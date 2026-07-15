@@ -8,7 +8,9 @@ import IssueList from "../components/IssueList";
 export const loader = async ({ request }) => {
   const { session } = await authenticate.admin(request);
 
-  const store = await prisma.store.findUnique({ where: { shop: session.shop } });
+  const store = await prisma.store.findUnique({
+    where: { shop: session.shop },
+  });
   if (!store) return { scan: null, issues: [], counts: {} };
 
   const scan = await prisma.scan.findFirst({
@@ -24,7 +26,7 @@ export const loader = async ({ request }) => {
     return acc;
   }, {});
 
-  return { scan, issues: scan.issues, counts };
+  return { scan, issues: scan.issues, counts, shop: session.shop};
 };
 
 const EmptyState = () => (
@@ -34,23 +36,27 @@ const EmptyState = () => (
       <s-paragraph>
         See your store&apos;s health score and issues once a scan completes.
       </s-paragraph>
-      <s-button href="/app/scan" variant="primary">Go to Scan</s-button>
+      <s-button href="/app/scan" variant="primary">
+        Go to Scan
+      </s-button>
     </s-grid>
   </s-section>
 );
 
 export default function Dashboard() {
-  const { scan, issues, counts } = useLoaderData();
+  const { scan, issues, counts , shop} = useLoaderData();
 
   return (
     <s-page heading="Store Health Dashboard">
-      <s-link slot="secondary-actions" href="/app/scan">Run New Scan</s-link>
+      <s-link slot="secondary-actions" href="/app/scan">
+        Run New Scan
+      </s-link>
       {!scan ? (
         <EmptyState />
       ) : (
         <>
           <ScoreCard score={scan.score} counts={counts} />
-          <IssueList issues={issues} />
+          <IssueList issues={issues} shop={shop}/>
         </>
       )}
     </s-page>
