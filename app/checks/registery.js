@@ -3,6 +3,8 @@ import emptyCollections from "./collections/emptyCollections";
 import missingSKUs from "./products/missingSKUs";
 import duplicateSKUs from "./products/duplicateSKUs";
 import zeroPrice from "./pricings/zeroPrice";
+import draftProducts from "./products/draftProducts";
+import missingAltText from "./seo/missingAltText";
 
 export const checkRegistry = [
   missingImages,
@@ -10,4 +12,6 @@ export const checkRegistry = [
   missingSKUs,
   duplicateSKUs,
   zeroPrice,
+  draftProducts,
+  missingAltText,
 ];

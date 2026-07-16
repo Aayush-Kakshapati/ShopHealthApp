@@ -19,6 +19,8 @@ export async function loadProducts(admin) {
         vendor: node.vendor,
         productType: node.productType,
         status: node.status,
+        seoTitle: node.seo?.title ?? null,
+        seoDescription: node.seo?.description ?? null,
         images: node.images.edges.map((e) => e.node),
         variants: node.variants.edges.map((e) => ({
           id: e.node.id,

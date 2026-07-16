@@ -8,10 +8,15 @@ export const PRODUCTS_QUERY = `#graphql
                     vendor
                     productType
                     status
-                    images(first: 1){
+                    seo{
+                        title
+                        description                
+                    }
+                    images(first: 10){
                         edges{
                             node{
                                 id
+                                altText
                                 url
                             }
                         }

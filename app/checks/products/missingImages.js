@@ -6,7 +6,7 @@ export default {
     return context.products
       .filter((p) => !p.images || p.images.length === 0)
       .map((p) => ({
-        resourceType: "Product",
+        resourceType: "product",
         resourceId: p.id,
         title: `Missing image: ${p.title}`,
         description: `Product "${p.title}" has no images.`,
