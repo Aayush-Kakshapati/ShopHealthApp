@@ -89,6 +89,7 @@ model Issue {
   image          String?
   recommendation String
   status         Status  @default(Open)
+  metadata       Json?
 
   scan           Scan    @relation(fields: [scanId], references: [id], onDelete: Cascade)
 

@@ -35,6 +35,7 @@ export async function runScan({ admin, shop }) {
           description: issue.description,
           image: issue.image ?? null,
           recommendation: issue.recommendation,
+          metadata: issue.metadata ?? null
         })),
       });
     }
