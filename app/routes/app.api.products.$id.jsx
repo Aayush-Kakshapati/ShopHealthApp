@@ -8,23 +8,16 @@ export const loader = async ({ request, params }) => {
   const product = await loadProductDetail(admin, gid);
   return { product };
 };
-export const action = async ({ request, params }) => {
+export const action = async ({ request,  }) => {
   const { admin } = await authenticate.admin(request);
-
-  const gid = `gid://shopify/Product/${params.id}`;
-
   const formData = await request.formData();
 
-  const payload = JSON.parse(
-    formData.get("payload")
-  );
-
+  const payload = JSON.parse(formData.get("payload"));
 
   await saveProductChanges(admin, {
     original: payload.original,
     updated: payload.updated,
   });
-
 
   return {
     success: true,

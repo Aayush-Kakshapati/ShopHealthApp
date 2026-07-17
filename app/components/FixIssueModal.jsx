@@ -20,10 +20,6 @@ export default function FixIssueModal({ issue, modalRef }) {
 
   const productId = issue?.resourceId?.split("/").pop();
 
-  /*
-    LOAD PRODUCT
-  */
-
   useEffect(() => {
     if (issue?.resourceType !== "product" || !productId) {
       return;
@@ -34,10 +30,6 @@ export default function FixIssueModal({ issue, modalRef }) {
 
     detailFetcher.load(`/app/api/products/${productId}`);
   }, [issue?.id]);
-
-  /*
-    SET FORM
-  */
 
   useEffect(() => {
     const product = detailFetcher.data?.product;
@@ -51,9 +43,7 @@ export default function FixIssueModal({ issue, modalRef }) {
     setForm(structuredClone(product));
   }, [detailFetcher.data]);
 
-  /*
-    SAVE COMPLETE
-  */
+
 
   useEffect(() => {
     if (saveFetcher.data?.success) {
@@ -106,6 +96,7 @@ export default function FixIssueModal({ issue, modalRef }) {
     });
   };
 
+
   const hasChanges = JSON.stringify(original) !== JSON.stringify(form);
 
   const save = () => {
@@ -121,6 +112,7 @@ export default function FixIssueModal({ issue, modalRef }) {
         action: `/app/api/products/${productId}`,
       },
     );
+    shopify.toast.show('Product Details Updated');
   };
 
   const loading = detailFetcher.state !== "idle";
@@ -144,8 +136,6 @@ export default function FixIssueModal({ issue, modalRef }) {
 
       {form && (
         <s-stack direction="block" gap="large">
-          {/* HEADER */}
-
           <s-stack direction="inline" justifyContent="space-between">
             <s-heading>{form.title || "Untitled Product"}</s-heading>
 
@@ -153,8 +143,6 @@ export default function FixIssueModal({ issue, modalRef }) {
           </s-stack>
 
           <s-divider />
-
-          {/* PRODUCT DETAILS */}
 
           <s-section heading="Product">
             <s-stack direction="block" gap="base">
@@ -208,8 +196,6 @@ export default function FixIssueModal({ issue, modalRef }) {
             </s-stack>
           </s-section>
 
-          {/* MEDIA PLACEHOLDER */}
-
           <s-section heading="Media">
             <s-stack direction="block" gap="base">
               {form.media.length > 0 ? (
@@ -244,6 +230,7 @@ export default function FixIssueModal({ issue, modalRef }) {
                       >
                         Remove
                       </s-button>
+                      <s-button onClick={(e) => updateMedia(index, "image", e.target.value)}>Upload Images</s-button>
                     </s-stack>
                   ))}
                 </s-grid>
@@ -251,10 +238,8 @@ export default function FixIssueModal({ issue, modalRef }) {
                 <s-text tone="subdued">No images</s-text>
               )}
 
-              <s-button>Upload Images</s-button>
             </s-stack>
           </s-section>
-          {/* VARIANTS */}
 
           <s-section heading="Variants">
             <s-table>
@@ -301,8 +286,6 @@ export default function FixIssueModal({ issue, modalRef }) {
               </s-table-body>
             </s-table>
           </s-section>
-
-          {/* SEO */}
 
           <s-section heading="SEO">
             <s-stack direction="block">
