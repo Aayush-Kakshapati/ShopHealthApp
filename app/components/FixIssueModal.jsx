@@ -1,329 +1,218 @@
 /* eslint-disable react/prop-types */
-
 import { useEffect, useState } from "react";
 import { useFetcher } from "react-router";
+import { getAdminResourceUrl } from "../lib/adminLinks";
 
 const STATUS_OPTIONS = ["ACTIVE", "DRAFT", "ARCHIVED"];
 
-const STATUS_TONE = {
-  ACTIVE: "success",
-  DRAFT: "info",
-  ARCHIVED: "subdued",
-};
-
-export default function FixIssueModal({ issue, modalRef }) {
+export default function FixIssueModal({ issue, shop, modalRef }) {
   const detailFetcher = useFetcher();
   const saveFetcher = useFetcher();
-
   const [original, setOriginal] = useState(null);
   const [form, setForm] = useState(null);
 
-  const productId = issue?.resourceId?.split("/").pop();
+  const numericId = issue?.resourceId?.split("/").pop();
+  const adminUrl = issue ? getAdminResourceUrl(shop, issue.resourceType, issue.resourceId) : null;
+  const product = detailFetcher.data?.product;
+  const saveError = saveFetcher.data?.success === false ? saveFetcher.data.error : null;
 
   useEffect(() => {
-    if (issue?.resourceType !== "product" || !productId) {
-      return;
+    if (issue?.resourceType === "product" && numericId) {
+      setOriginal(null);
+      setForm(null);
+      detailFetcher.load(`/app/api/products/${numericId}`);
     }
-
-    setForm(null);
-    setOriginal(null);
-
-    detailFetcher.load(`/app/api/products/${productId}`);
   }, [issue?.id]);
 
   useEffect(() => {
-    const product = detailFetcher.data?.product;
-
-    if (!product) {
-      return;
+    if (product && !form) {
+      setOriginal(product);
+      // Deep clone so editing `form` never mutates `original` by reference —
+      // saveProductChanges needs both to genuinely differ to diff correctly.
+      setForm(JSON.parse(JSON.stringify(product)));
     }
-
-    setOriginal(structuredClone(product));
-
-    setForm(structuredClone(product));
-  }, [detailFetcher.data]);
-
-
+  }, [product]);
 
   useEffect(() => {
     if (saveFetcher.data?.success) {
       modalRef.current?.hideOverlay();
-
       setForm(null);
       setOriginal(null);
     }
   }, [saveFetcher.data]);
 
-  const updateField = (field, value) => {
-    setForm({
-      ...form,
-      [field]: value,
-    });
+  const handleSave = () => {
+    saveFetcher.submit(
+      { payload: JSON.stringify({ original, updated: form }) },
+      { method: "post", action: `/app/api/products/${numericId}` }
+    );
   };
 
   const updateVariant = (index, field, value) => {
-    const variants = [...form.variants];
-
-    variants[index] = {
-      ...variants[index],
-      [field]: value,
-    };
-
-    setForm({
-      ...form,
-      variants,
-    });
+    const updated = [...form.variants];
+    updated[index] = { ...updated[index], [field]: value };
+    setForm({ ...form, variants: updated });
   };
 
-  const updateMedia = (index, field, value) => {
-    const media = [...form.media];
-
-    media[index] = {
-      ...media[index],
-      [field]: value,
-    };
-
-    setForm({
-      ...form,
-      media,
-    });
-  };
-
-  const removeMedia = (id) => {
-    setForm({
-      ...form,
-      media: form.media.filter((item) => item.id !== id),
-    });
-  };
-
-
-  const hasChanges = JSON.stringify(original) !== JSON.stringify(form);
-
-  const save = () => {
-    saveFetcher.submit(
-      {
-        payload: JSON.stringify({
-          original,
-          updated: form,
-        }),
-      },
-      {
-        method: "post",
-        action: `/app/api/products/${productId}`,
-      },
-    );
-    shopify.toast.show('Product Details Updated');
-  };
-
-  const loading = detailFetcher.state !== "idle";
-
-  const saving = saveFetcher.state !== "idle";
+  const isLoading = detailFetcher.state !== "idle";
+  const isSaving = saveFetcher.state !== "idle";
 
   return (
-    <s-modal
-      id="fix-issue-modal"
-      ref={modalRef}
-      heading={issue?.title ?? "Fix Product"}
-      size="large"
-    >
-      {loading && (
-        <s-stack direction="inline" gap="small-300">
-          <s-spinner size="small" />
-
-          <s-text>Loading product...</s-text>
-        </s-stack>
+    <s-modal id="fix-issue-modal" ref={modalRef} heading={issue?.title ?? "Fix Issue"} size="large">
+      {issue?.resourceType !== "product" && (
+        <s-paragraph>This type of issue can&apos;t be edited here yet.</s-paragraph>
       )}
 
-      {form && (
+      {issue?.resourceType === "product" && (
         <s-stack direction="block" gap="large">
-          <s-stack direction="inline" justifyContent="space-between">
-            <s-heading>{form.title || "Untitled Product"}</s-heading>
+          {saveError && (
+            <s-banner tone="critical" heading="Couldn't save changes">
+              <s-paragraph>{saveError}</s-paragraph>
+            </s-banner>
+          )}
 
-            <s-badge tone={STATUS_TONE[form.status]}>{form.status}</s-badge>
-          </s-stack>
-
-          <s-divider />
-
-          <s-section heading="Product">
-            <s-stack direction="block" gap="base">
-              <s-text-field
-                label="Title"
-
-                value={form.title}
-
-                onChange={(e) => updateField("title", e.target.value)}
-              />
-
-              <s-text-area
-                label="Description"
-
-                rows={6}
-
-                value={form.description}
-
-                onChange={(e) => updateField("description", e.target.value)}
-              />
-
-              <s-text-field
-                label="Vendor"
-
-                value={form.vendor}
-
-                onChange={(e) => updateField("vendor", e.target.value)}
-              />
-
-              <s-text-field
-                label="Product Type"
-
-                value={form.productType}
-
-                onChange={(e) => updateField("productType", e.target.value)}
-              />
-
-              <s-select
-                label="Status"
-
-                value={form.status}
-
-                onChange={(e) => updateField("status", e.target.value)}
-              >
-                {STATUS_OPTIONS.map((status) => (
-                  <s-option key={status} value={status}>
-                    {status}
-                  </s-option>
-                ))}
-              </s-select>
+          {isLoading && (
+            <s-stack direction="inline" gap="base" alignItems="center">
+              <s-spinner accessibilityLabel="Loading product" size="small" />
+              <s-text tone="subdued">Loading product details…</s-text>
             </s-stack>
-          </s-section>
+          )}
 
-          <s-section heading="Media">
-            <s-stack direction="block" gap="base">
-              {form.media.length > 0 ? (
-                <s-grid
-                  gridTemplateColumns="repeat(auto-fill,minmax(220px,1fr))"
-                  gap="base"
-                >
-                  {form.media.map((image, index) => (
-                    <s-stack key={image.id} direction="block" gap="small-300">
-                      <s-thumbnail
-                        src={image.url}
+          {form && (
+            <>
+              <s-section heading="Basic information">
+                <s-stack direction="block" gap="base">
+                  <s-text-field
+                    label="Title"
+                    value={form.title}
+                    disabled={isSaving || undefined}
+                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  />
+                  <s-text-area
+                    label="Description"
+                    value={form.description}
+                    disabled={isSaving || undefined}
+                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  />
+                  <s-stack direction="inline" gap="base">
+                    <s-text-field
+                      label="Vendor"
+                      value={form.vendor}
+                      disabled={isSaving || undefined}
+                      onChange={(e) => setForm({ ...form, vendor: e.target.value })}
+                    />
+                    <s-text-field
+                      label="Product type"
+                      value={form.productType}
+                      disabled={isSaving || undefined}
+                      onChange={(e) => setForm({ ...form, productType: e.target.value })}
+                    />
+                  </s-stack>
+                  <s-select
+                    label="Status"
+                    value={form.status}
+                    disabled={isSaving || undefined}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                  >
+                    {STATUS_OPTIONS.map((s) => (
+                      <s-option key={s} value={s}>{s}</s-option>
+                    ))}
+                  </s-select>
+                </s-stack>
+              </s-section>
 
-                        alt={image.alt}
+              <s-section heading="Media">
+                {form.media.length > 0 ? (
+                  <s-stack direction="inline" gap="base">
+                    {form.media.map((m) => (
+                      <s-thumbnail key={m.id} src={m.url} alt={m.alt || form.title} size="large" />
+                    ))}
+                  </s-stack>
+                ) : (
+                  <s-paragraph tone="subdued">No images. Upload images from the full product page in Shopify.</s-paragraph>
+                )}
+              </s-section>
 
-                        size="large"
-                      />
+              <s-section heading="Pricing & variants">
+                <s-table>
+                  <s-table-header-row>
+                    <s-table-header>Variant</s-table-header>
+                    <s-table-header>SKU</s-table-header>
+                    <s-table-header>Barcode</s-table-header>
+                    <s-table-header>Price</s-table-header>
+                    <s-table-header>Inventory</s-table-header>
+                  </s-table-header-row>
+                  <s-table-body>
+                    {form.variants.map((variant, i) => (
+                      <s-table-row key={variant.id}>
+                        <s-table-cell>{variant.title}</s-table-cell>
+                        <s-table-cell>
+                          <s-text-field
+                            value={variant.sku}
+                            disabled={isSaving || undefined}
+                            onChange={(e) => updateVariant(i, "sku", e.target.value)}
+                          />
+                        </s-table-cell>
+                        <s-table-cell>
+                          <s-text-field
+                            value={variant.barcode}
+                            disabled={isSaving || undefined}
+                            onChange={(e) => updateVariant(i, "barcode", e.target.value)}
+                          />
+                        </s-table-cell>
+                        <s-table-cell>
+                          <s-text-field
+                            type="number"
+                            value={variant.price}
+                            disabled={isSaving || undefined}
+                            onChange={(e) => updateVariant(i, "price", e.target.value)}
+                          />
+                        </s-table-cell>
+                        <s-table-cell>
+                          <s-text tone="subdued">{variant.inventoryQuantity} in stock</s-text>
+                        </s-table-cell>
+                      </s-table-row>
+                    ))}
+                  </s-table-body>
+                </s-table>
+              </s-section>
 
-                      <s-text-field
-                        label="Alt text"
-
-                        value={image.alt}
-
-                        onChange={(e) =>
-                          updateMedia(index, "alt", e.target.value)
-                        }
-                      />
-
-                      <s-button
-                        tone="critical"
-
-                        onClick={() => removeMedia(image.id)}
-                      >
-                        Remove
-                      </s-button>
-                      <s-button onClick={(e) => updateMedia(index, "image", e.target.value)}>Upload Images</s-button>
-                    </s-stack>
-                  ))}
-                </s-grid>
-              ) : (
-                <s-text tone="subdued">No images</s-text>
-              )}
-
-            </s-stack>
-          </s-section>
-
-          <s-section heading="Variants">
-            <s-table>
-              <s-table-header-row>
-                <s-table-header>Variant</s-table-header>
-
-                <s-table-header>SKU</s-table-header>
-
-                <s-table-header>Price</s-table-header>
-              </s-table-header-row>
-
-              <s-table-body>
-                {form.variants.map((variant, index) => (
-                  <s-table-row key={variant.id}>
-                    <s-table-cell>{variant.title}</s-table-cell>
-
-                    <s-table-cell>
-                      <s-text-field
-                        label="SKU"
-
-                        value={variant.sku}
-
-                        onChange={(e) =>
-                          updateVariant(index, "sku", e.target.value)
-                        }
-                      />
-                    </s-table-cell>
-
-                    <s-table-cell>
-                      <s-text-field
-                        label="Price"
-
-                        type="number"
-
-                        value={variant.price}
-
-                        onChange={(e) =>
-                          updateVariant(index, "price", e.target.value)
-                        }
-                      />
-                    </s-table-cell>
-                  </s-table-row>
-                ))}
-              </s-table-body>
-            </s-table>
-          </s-section>
-
-          <s-section heading="SEO">
-            <s-stack direction="block">
-              <s-text-field
-                label="SEO title"
-
-                value={form.seoTitle}
-
-                onChange={(e) => updateField("seoTitle", e.target.value)}
-              />
-
-              <s-text-area
-                label="SEO description"
-
-                rows={4}
-
-                value={form.seoDescription}
-
-                onChange={(e) => updateField("seoDescription", e.target.value)}
-              />
-            </s-stack>
-          </s-section>
+              <s-section heading="Search engine listing">
+                <s-stack direction="block" gap="base">
+                  <s-text-field
+                    label="Page title"
+                    value={form.seoTitle}
+                    disabled={isSaving || undefined}
+                    onChange={(e) => setForm({ ...form, seoTitle: e.target.value })}
+                  />
+                  <s-text-area
+                    label="Meta description"
+                    value={form.seoDescription}
+                    disabled={isSaving || undefined}
+                    onChange={(e) => setForm({ ...form, seoDescription: e.target.value })}
+                  />
+                </s-stack>
+              </s-section>
+            </>
+          )}
         </s-stack>
       )}
 
-      <s-button
-        slot="primary-action"
-
-        variant="primary"
-
-        loading={saving || undefined}
-
-        disabled={!hasChanges}
-
-        onClick={save}
-      >
-        Save Changes
-      </s-button>
+      <s-stack slot="primary-action" direction="inline" gap="base">
+        {adminUrl && (
+          <s-button href={adminUrl} target="_blank" disabled={isSaving || undefined}>
+            Open full page in Shopify
+          </s-button>
+        )}
+        <s-button
+          variant="primary"
+          onClick={handleSave}
+          loading={isSaving || undefined}
+          disabled={!form || isSaving}
+        >
+          Save Changes
+        </s-button>
+      </s-stack>
     </s-modal>
   );
 }
