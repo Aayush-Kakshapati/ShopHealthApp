@@ -12,9 +12,12 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
   const [form, setForm] = useState(null);
 
   const numericId = issue?.resourceId?.split("/").pop();
-  const adminUrl = issue ? getAdminResourceUrl(shop, issue.resourceType, issue.resourceId) : null;
+  const adminUrl = issue
+    ? getAdminResourceUrl(shop, issue.resourceType, issue.resourceId)
+    : null;
   const product = detailFetcher.data?.product;
-  const saveError = saveFetcher.data?.success === false ? saveFetcher.data.error : null;
+  const saveError =
+    saveFetcher.data?.success === false ? saveFetcher.data.error : null;
 
   useEffect(() => {
     if (issue?.resourceType === "product" && numericId) {
@@ -44,7 +47,7 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
   const handleSave = () => {
     saveFetcher.submit(
       { payload: JSON.stringify({ original, updated: form }) },
-      { method: "post", action: `/app/api/products/${numericId}` }
+      { method: "post", action: `/app/api/products/${numericId}` },
     );
   };
 
@@ -58,9 +61,16 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
   const isSaving = saveFetcher.state !== "idle";
 
   return (
-    <s-modal id="fix-issue-modal" ref={modalRef} heading={issue?.title ?? "Fix Issue"} size="large">
+    <s-modal
+      id="fix-issue-modal"
+      ref={modalRef}
+      heading={issue?.title ?? "Fix Issue"}
+      size="large"
+    >
       {issue?.resourceType !== "product" && (
-        <s-paragraph>This type of issue can&apos;t be edited here yet.</s-paragraph>
+        <s-paragraph>
+          This type of issue can&apos;t be edited here yet.
+        </s-paragraph>
       )}
 
       {issue?.resourceType === "product" && (
@@ -86,36 +96,48 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
                     label="Title"
                     value={form.title}
                     disabled={isSaving || undefined}
-                    onChange={(e) => setForm({ ...form, title: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, title: e.target.value })
+                    }
                   />
                   <s-text-area
                     label="Description"
                     value={form.description}
                     disabled={isSaving || undefined}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, description: e.target.value })
+                    }
                   />
                   <s-stack direction="inline" gap="base">
                     <s-text-field
                       label="Vendor"
                       value={form.vendor}
                       disabled={isSaving || undefined}
-                      onChange={(e) => setForm({ ...form, vendor: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, vendor: e.target.value })
+                      }
                     />
                     <s-text-field
                       label="Product type"
                       value={form.productType}
                       disabled={isSaving || undefined}
-                      onChange={(e) => setForm({ ...form, productType: e.target.value })}
+                      onChange={(e) =>
+                        setForm({ ...form, productType: e.target.value })
+                      }
                     />
                   </s-stack>
                   <s-select
                     label="Status"
                     value={form.status}
                     disabled={isSaving || undefined}
-                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, status: e.target.value })
+                    }
                   >
                     {STATUS_OPTIONS.map((s) => (
-                      <s-option key={s} value={s}>{s}</s-option>
+                      <s-option key={s} value={s}>
+                        {s}
+                      </s-option>
                     ))}
                   </s-select>
                 </s-stack>
@@ -125,11 +147,24 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
                 {form.media.length > 0 ? (
                   <s-stack direction="inline" gap="base">
                     {form.media.map((m) => (
-                      <s-thumbnail key={m.id} src={m.url} alt={m.alt || form.title} size="large" />
+                      <s-thumbnail
+                        key={m.id}
+                        src={m.url}
+                        alt={m.alt || form.title}
+                        size="large"
+                      />
                     ))}
                   </s-stack>
                 ) : (
-                  <s-paragraph tone="subdued">No images. Upload images from the full product page in Shopify.</s-paragraph>
+                  <s-drop-zone
+                    label="Upload"
+                    accessibilityLabel="Upload image of type jpg, png, or gif"
+                    accept=".jpg,.png,.gif"
+                    multiple
+                    onInput="console.log('onInput', event.currentTarget?.value)"
+                    onChange="console.log('onChange', event.currentTarget?.value)"
+                    onDropRejected="console.log('onDropRejected', event.currentTarget?.value)"
+                  ></s-drop-zone>
                 )}
               </s-section>
 
@@ -150,14 +185,18 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
                           <s-text-field
                             value={variant.sku}
                             disabled={isSaving || undefined}
-                            onChange={(e) => updateVariant(i, "sku", e.target.value)}
+                            onChange={(e) =>
+                              updateVariant(i, "sku", e.target.value)
+                            }
                           />
                         </s-table-cell>
                         <s-table-cell>
                           <s-text-field
                             value={variant.barcode}
                             disabled={isSaving || undefined}
-                            onChange={(e) => updateVariant(i, "barcode", e.target.value)}
+                            onChange={(e) =>
+                              updateVariant(i, "barcode", e.target.value)
+                            }
                           />
                         </s-table-cell>
                         <s-table-cell>
@@ -165,11 +204,15 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
                             type="number"
                             value={variant.price}
                             disabled={isSaving || undefined}
-                            onChange={(e) => updateVariant(i, "price", e.target.value)}
+                            onChange={(e) =>
+                              updateVariant(i, "price", e.target.value)
+                            }
                           />
                         </s-table-cell>
                         <s-table-cell>
-                          <s-text tone="subdued">{variant.inventoryQuantity} in stock</s-text>
+                          <s-text tone="subdued">
+                            {variant.inventoryQuantity} in stock
+                          </s-text>
                         </s-table-cell>
                       </s-table-row>
                     ))}
@@ -183,13 +226,17 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
                     label="Page title"
                     value={form.seoTitle}
                     disabled={isSaving || undefined}
-                    onChange={(e) => setForm({ ...form, seoTitle: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, seoTitle: e.target.value })
+                    }
                   />
                   <s-text-area
                     label="Meta description"
                     value={form.seoDescription}
                     disabled={isSaving || undefined}
-                    onChange={(e) => setForm({ ...form, seoDescription: e.target.value })}
+                    onChange={(e) =>
+                      setForm({ ...form, seoDescription: e.target.value })
+                    }
                   />
                 </s-stack>
               </s-section>
@@ -198,13 +245,17 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
         </s-stack>
       )}
 
-      <s-stack slot="primary-action" direction="inline" gap="base">
         {adminUrl && (
-          <s-button href={adminUrl} target="_blank" disabled={isSaving || undefined}>
+          <s-button
+            href={adminUrl}
+            target="_blank"
+            disabled={isSaving || undefined}
+          >
             Open full page in Shopify
           </s-button>
         )}
         <s-button
+          slot="primary-action"
           variant="primary"
           onClick={handleSave}
           loading={isSaving || undefined}
@@ -212,7 +263,6 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
         >
           Save Changes
         </s-button>
-      </s-stack>
     </s-modal>
   );
 }
