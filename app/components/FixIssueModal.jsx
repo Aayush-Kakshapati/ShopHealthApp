@@ -10,6 +10,8 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
   const saveFetcher = useFetcher();
   const [original, setOriginal] = useState(null);
   const [form, setForm] = useState(null);
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [uploadError, setUploadError] = useState(null);
 
   const numericId = issue?.resourceId?.split("/").pop();
   const adminUrl = issue
@@ -23,6 +25,7 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
     if (issue?.resourceType === "product" && numericId) {
       setOriginal(null);
       setForm(null);
+      setUploadError(null);
       detailFetcher.load(`/app/api/products/${numericId}`);
     }
   }, [issue?.id]);
@@ -30,8 +33,6 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
   useEffect(() => {
     if (product && !form) {
       setOriginal(product);
-      // Deep clone so editing `form` never mutates `original` by reference —
-      // saveProductChanges needs both to genuinely differ to diff correctly.
       setForm(JSON.parse(JSON.stringify(product)));
     }
   }, [product]);
@@ -56,6 +57,87 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
     updated[index] = { ...updated[index], [field]: value };
     setForm({ ...form, variants: updated });
   };
+
+  const handleImageDrop = async (event) => {
+  const file = event.currentTarget.files?.[0];
+  if (!file) {
+    setUploadError("No file selected.");
+    return;
+  }
+
+
+  setIsUploadingImage(true);
+  setUploadError(null);
+
+  try {
+    // Step 1 - Ask server for Shopify staged upload target
+    const stagedForm = new FormData();
+
+    stagedForm.append("intent", "stagedUpload");
+    stagedForm.append("filename", file.name);
+    stagedForm.append("mimeType", file.type);
+    stagedForm.append("fileSize", file.size.toString());
+
+    const stagedRes = await fetch(`/app/api/products/${numericId}`, {
+      method: "POST",
+      body: stagedForm,
+    });
+
+    const stagedData = await stagedRes.json();
+
+    if (!stagedData.success) {
+      throw new Error(stagedData.error);
+    }
+
+    const { url, resourceUrl, parameters } = stagedData.target;
+
+    // Step 2 - Upload file directly to Shopify storage
+    const uploadForm = new FormData();
+
+    parameters.forEach((param) => {
+      uploadForm.append(param.name, param.value);
+    });
+
+    uploadForm.append("file", file);
+
+    const uploadRes = await fetch(url, {
+      method: "POST",
+      body: uploadForm,
+    });
+
+    if (!uploadRes.ok) {
+      throw new Error("Upload to Shopify storage failed.");
+    }
+
+    // Step 3 - Attach image to product
+    const attachForm = new FormData();
+
+    attachForm.append("intent", "attachImage");
+    attachForm.append("resourceUrl", resourceUrl);
+    attachForm.append("alt", form.title);
+
+    const attachRes = await fetch(`/app/api/products/${numericId}`, {
+      method: "POST",
+      body: attachForm,
+    });
+
+    const attachData = await attachRes.json();
+
+    if (!attachData.success) {
+      throw new Error(attachData.error);
+    }
+
+    detailFetcher.load(`/app/api/products/${numericId}`);
+  } catch (err) {
+    console.error(err);
+    setUploadError(err.message);
+  } finally {
+    setIsUploadingImage(false);
+
+    event.currentTarget.value = "";
+  }
+};
+
 
   const isLoading = detailFetcher.state !== "idle";
   const isSaving = saveFetcher.state !== "idle";
@@ -156,15 +238,33 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
                     ))}
                   </s-stack>
                 ) : (
-                  <s-drop-zone
-                    label="Upload"
-                    accessibilityLabel="Upload image of type jpg, png, or gif"
-                    accept=".jpg,.png,.gif"
-                    multiple
-                    onInput="console.log('onInput', event.currentTarget?.value)"
-                    onChange="console.log('onChange', event.currentTarget?.value)"
-                    onDropRejected="console.log('onDropRejected', event.currentTarget?.value)"
-                  ></s-drop-zone>
+                  <s-stack direction="block" gap="base">
+                    {uploadError && (
+                      <s-banner tone="critical" heading="Upload failed">
+                        <s-paragraph>{uploadError}</s-paragraph>
+                      </s-banner>
+                    )}
+                    <s-drop-zone
+                      label="Upload product image"
+                      accessibilityLabel="Upload a product image"
+                      accept=".jpg,.jpeg,.png,.gif"
+                      disabled={isUploadingImage || undefined}
+                      onChange={handleImageDrop}
+                    />
+                    {isUploadingImage && (
+                      <s-stack
+                        direction="inline"
+                        gap="base"
+                        alignItems="center"
+                      >
+                        <s-spinner
+                          accessibilityLabel="Uploading image"
+                          size="small"
+                        />
+                        <s-text tone="subdued">Uploading…</s-text>
+                      </s-stack>
+                    )}
+                  </s-stack>
                 )}
               </s-section>
 
@@ -245,24 +345,24 @@ export default function FixIssueModal({ issue, shop, modalRef }) {
         </s-stack>
       )}
 
-        {adminUrl && (
-          <s-button
-            href={adminUrl}
-            target="_blank"
-            disabled={isSaving || undefined}
-          >
-            Open full page in Shopify
-          </s-button>
-        )}
+      {adminUrl && (
         <s-button
-          slot="primary-action"
-          variant="primary"
-          onClick={handleSave}
-          loading={isSaving || undefined}
-          disabled={!form || isSaving}
+          href={adminUrl}
+          target="_blank"
+          disabled={isSaving || undefined}
         >
-          Save Changes
+          Open full page in Shopify
         </s-button>
+      )}
+      <s-button
+        slot="primary-action"
+        variant="primary"
+        onClick={handleSave}
+        loading={isSaving || undefined}
+        disabled={!form || isSaving}
+      >
+        Save Changes
+      </s-button>
     </s-modal>
   );
 }

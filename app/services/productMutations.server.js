@@ -172,3 +172,55 @@ export async function saveProductChanges(
 
   return true;
 }
+
+const STAGED_UPLOADS_CREATE = `#graphql
+  mutation stagedUploadsCreate($input: [StagedUploadInput!]!) {
+    stagedUploadsCreate(input: $input) {
+      stagedTargets {
+        url
+        resourceUrl
+        parameters { name value }
+      }
+      userErrors { field message }
+    }
+  }
+`;
+
+const PRODUCT_CREATE_MEDIA = `#graphql
+  mutation productCreateMedia($productId: ID!, $media: [CreateMediaInput!]!) {
+    productCreateMedia(productId: $productId, media: $media) {
+      media { alt mediaContentType }
+      mediaUserErrors { field message }
+    }
+  }
+`;
+
+export async function createStagedUpload(admin, { filename, mimeType, fileSize }) {
+  const response = await admin.graphql(STAGED_UPLOADS_CREATE, {
+    variables: {
+      input: [
+        {
+          resource: "IMAGE",
+          filename,
+          mimeType,
+          fileSize: String(fileSize),
+          httpMethod: "POST",
+        },
+      ],
+    },
+  });
+  const data = await response.json();
+  throwErrors(data.data.stagedUploadsCreate.userErrors);
+  return data.data.stagedUploadsCreate.stagedTargets[0]; // { url, resourceUrl, parameters }
+}
+
+export async function attachProductImage(admin, productId, resourceUrl, alt) {
+  const response = await admin.graphql(PRODUCT_CREATE_MEDIA, {
+    variables: {
+      productId,
+      media: [{ originalSource: resourceUrl, mediaContentType: "IMAGE", alt: alt ?? "" }],
+    },
+  });
+  const data = await response.json();
+  throwErrors(data.data.productCreateMedia.mediaUserErrors);
+}
