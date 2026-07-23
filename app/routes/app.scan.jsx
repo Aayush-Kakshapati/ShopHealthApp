@@ -51,6 +51,11 @@ export default function Scan() {
             <ScanningIndicator />
           )}
         </s-stack>
+        <s-modal id="my-modal">
+          <s-text>Hello, World!</s-text>
+        </s-modal>
+
+        <s-button onClick="shopify.modal.show('my-modal')">Open Modal</s-button>
       </s-section>
     </s-page>
   );
