@@ -1,0 +1,18 @@
+api_version = "2026-04"
+
+[[extensions]]
+# Change the merchant-facing name of the extension in locales/en.default.json
+name = "t:name"
+handle = "shop-health-extension"
+type = "ui_extension"
+uid = "ed3e80af-405d-ad81-702e-1ec79ae5b23ed23061b4"
+
+# Only 1 target can be specified for each app-home extension
+[[extensions.targeting]]
+module = "./src/AppHome.jsx"
+target = "admin.app.home.render"
+assets = "./assets"
+
+[access_scopes]
+  # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+  scopes = "write_metaobject_definitions,write_metaobjects,write_products"
