@@ -1,11 +1,12 @@
 <div id="scoreDateTracker">
     <div class="scoreDateBox">
-        <div class="health_score">Health Score = 60</div>
-        <div class="last_scanned">Last Scanned: 06/04</div>
+        <div id="health_score"></div>
+        <div id="last_scanned"></div>
     </div>
 </div>
 
 {{ 's_d.css' | asset_url | stylesheet_tag }}
+{{ 's_d.js' | asset_url | script_tag }}
 
 {% schema %}
 {
