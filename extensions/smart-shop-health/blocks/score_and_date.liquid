@@ -1,0 +1,16 @@
+<div id="scoreDateTracker">
+    <div class="scoreDateBox">
+        <div class="health_score">Health Score = 60</div>
+        <div class="last_scanned">Last Scanned: 06/04</div>
+    </div>
+</div>
+
+{{ 's_d.css' | asset_url | stylesheet_tag }}
+
+{% schema %}
+{
+    "name": "Score and Date Tracker",
+    "target" : "body",
+    "settings": []
+}
+{% endschema %}
