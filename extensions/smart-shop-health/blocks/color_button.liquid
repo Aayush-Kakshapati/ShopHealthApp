@@ -1,0 +1,53 @@
+<button
+  id="color-btn"
+  style="
+    height: {{block.settings.height}};
+    width: {{block.settings.width}};
+    padding: {{ block.settings.padding }};
+    margin: {{ block.settings.margin }};
+    background-color: #ffffff;
+  "
+>
+  {{ block.settings.color_btn }}
+</button>
+
+{{ 'c_btn.js' | asset_url | script_tag }}
+
+{% schema %}
+{
+  "name": "Color Button",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "color_btn",
+      "label": "Change Color Button",
+      "default": "Button"
+    },
+    {
+      "type": "text",
+      "id": "padding",
+      "label": "Padding",
+      "default": "20px 12px"
+    },
+    {
+      "type": "text",
+      "id": "margin",
+      "label": "Margin",
+      "default": "4px 4px"
+    },
+    {
+      "type": "text",
+      "id": "height",
+      "label": "Height",
+      "default": "50px"
+    },
+    {
+      "type": "text",
+      "id": "width",
+      "label": "Width",
+      "default": "100px"
+    }
+  ]
+}
+{% endschema %}
