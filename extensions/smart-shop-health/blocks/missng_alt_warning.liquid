@@ -1,16 +1,10 @@
-<span id="missing_alt_text">
-    
-</span>
-
-<script>
-    
-</script>
+{{ 'alt_checker.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'alt_checker.js' | asset_url }}" defer></script>
 
 {% schema %}
-    {
-        "name": "Missing_Alt_Warning",
-        "target": "section",
-        "settings": []
-    }
-
+{
+  "name": "Alt Text Highlighter",
+  "target": "body",
+  "settings": []
+}
 {% endschema %}
