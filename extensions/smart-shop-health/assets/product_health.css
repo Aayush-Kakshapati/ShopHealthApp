@@ -1,0 +1,46 @@
+.product-health-box {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 13px;
+  color: #202223;
+  max-width: 240px;
+}
+
+.product-health-title {
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.product-health-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 0;
+}
+
+.check-icon {
+  font-weight: 700;
+  width: 16px;
+}
+
+.check-pass .check-icon {
+  color: #108043;
+}
+
+.check-fail .check-icon {
+  color: #d82c0d;
+}
+
+.product-health-score {
+  margin-top: 8px;
+  font-weight: 600;
+  border-top: 1px solid #e1e3e5;
+  padding-top: 6px;
+}
+
+.product-health-error {
+  font-size: 13px;
+  color: #6d7175;
+}
