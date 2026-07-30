@@ -5,6 +5,8 @@ import emptyCollections from "./collections/emptyCollections";
 import zeroPrice from "./pricings/zeroPrice";
 import draftProducts from "./products/draftProducts";
 import missingAltText from "./seo/missingAltText";
+import missingVendor from "./products/missingVendor"
+import zeroStock from "./products/zeroStock"
 
 export const checkRegistry = [
   missingImages,
@@ -14,4 +16,6 @@ export const checkRegistry = [
   zeroPrice,
   draftProducts,
   missingAltText,
+  missingVendor,
+  zeroStock
 ];

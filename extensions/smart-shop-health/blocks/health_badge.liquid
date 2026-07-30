@@ -1,13 +1,15 @@
 {% if product %}
-<div id="productHealthBadge" data-product-id="{{ product.id }}"></div>
-{{ 'product_health.css' | asset_url | stylesheet_tag }}
-<script src="{{ 'product_health.js' | asset_url}}" defer></script>
+  <script>
+    window.shopHealthProductId = {{ product.id | json }};
+  </script>
+  {{ 'product_health.css' | asset_url | stylesheet_tag }}
+  <script src="{{ 'product_health.js' | asset_url}}" defer></script>
 {% endif %}
 
 {% schema %}
 {
   "name": "Product Health Badge",
-  "target": "section",
+  "target": "body",
   "settings": []
 }
 {% endschema %}

@@ -13,7 +13,7 @@
   }
 
   function wrapWithWarning(img) {
-    if (img.dataset.shophealthFlagged) return; // avoid double-wrapping
+    if (img.dataset.shophealthFlagged) return;
     img.dataset.shophealthFlagged = 'true';
 
     var wrapper = document.createElement('div');

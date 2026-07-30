@@ -1,14 +1,13 @@
 import prisma from "../db.server";
 import { authenticate } from "../shopify.server";
 
-// PLACEHOLDER — replace these with your real checkId values from
-// your CheckDefinition rows / checkRunner.server registry
 const CHECK_MAP = {
-  Images: ["missing-image", "low-res-image"],
-  Description: ["missing-description", "short-description"],
-  Price: ["missing-price", "invalid-price"],
-  SKU: ["missing-sku"],
-  Inventory: ["out-of-stock", "no-inventory-tracking"],
+  Images: ["missing-images"],
+  Collections: ["empty-collection"],
+  Price: ["zero-price"],
+  Published: ["draft-products"],
+  "Alt Text": ["missing-alt-text"],
+  Stock: ["zero-stock"]
 };
 
 export async function loader({ request }) {
