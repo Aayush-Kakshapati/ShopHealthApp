@@ -1,43 +1,47 @@
 (function () {
   var productId = window.shopHealthProductId;
-  if (!productId) return; 
+  if (!productId) return;
 
   function findMainProductImage() {
     return document.querySelector(
-      ".product img, [data-product-media] img, .product__media img"
+      ".product img, [data-product-media] img, .product__media img",
     );
   }
 
-  function wrapWithOverlay(img, data) {
+  function createOverlay(img, data) {
     if (img.dataset.shophealthOverlayed) return;
     img.dataset.shophealthOverlayed = "true";
 
-    var wrapper = document.createElement("div");
-    wrapper.className = "product_health_wrapper";
+    var container = img.closest(".product-media-container") || img.parentElement;
+    if (!container) container = img.parentElement;
 
+    container.style.position = "relative";
+
+    var badge = document.createElement("div");
+    badge.className = "product_health_badge";
+    badge.textContent = "Health: " + `${data.score} `;
     var panel = document.createElement("div");
     panel.className = "product_health_panel";
 
-    var checksHtml = data.checks
-      .map(function (check) {
-        var icon = check.passed ? "✓" : "✗";
-        var cls = check.passed ? "check-pass" : "check-fail";
-        return (
-          "<div class='shophealth-check-row " + cls + "'>" +
-          "<span>" + icon + "</span> <span>" + check.label + "</span>" +
-          "</div>"
-        );
-      })
-      .join("");
-
     panel.innerHTML =
       "<div class='product_health_title'>Product Health</div>" +
-      checksHtml +
-      "<div class='product_health_score'>Health: " + data.score + "%</div>";
+      data.checks
+        .map(function (check) {
+          return (
+            "<div class='shophealth-check-row " +
+            (check.passed ? "check-pass" : "check-fail") +
+            "'>" +
+            "<span>" +
+            (check.passed ? "✓" : "✗") +
+            "</span><span>" +
+            check.label +
+            "</span></div>"
+          );
+        })
+        .join("");
 
-    img.parentNode.insertBefore(wrapper, img);
-    wrapper.appendChild(img);
-    wrapper.appendChild(panel);
+    container.appendChild(badge);
+    container.appendChild(panel);
   }
 
   function init() {
@@ -45,22 +49,16 @@
     if (!img) return;
 
     fetch("/apps/shophealth/health?productId=" + encodeURIComponent(productId))
-      .then(function (res) {
-        if (!res.ok) throw new Error("Request failed: " + res.status);
-        return res.json();
+      .then(function (r) {
+        return r.json();
       })
       .then(function (data) {
         if (data.score == null) return;
-        wrapWithOverlay(img, data);
-      })
-      .catch(function (err) {
-        console.error("Product health overlay error:", err);
+        createOverlay(img, data);
       });
   }
 
-  if (document.readyState === "loading") {
+  if (document.readyState === "loading")
     document.addEventListener("DOMContentLoaded", init);
-  } else {
-    init();
-  }
+  else init();
 })();

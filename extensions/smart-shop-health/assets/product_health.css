@@ -1,44 +1,59 @@
-.product_health_wrapper {
-  position: relative;
-  display: inline-block;
+media-gallery{
+    position:relative;
 }
 
-.product_health_panel {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  background: rgba(255, 255, 255, 0.95);
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 10px 14px;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  font-size: 12px;
-  color: #202223;
-  min-width: 160px;
+.product_health_badge{
+    position:absolute;
+    min-height: 40px !important;
+    min-width: 120px !important;
+    right:12px !important;
+    bottom:12px !important;
+    background:#2e7d32;
+    color:#fff;
+    padding:8px 14px;
+    border-radius:30px;
+    font-weight:600;
+    cursor:pointer;
+    z-index:30;
 }
 
-.product_health_title {
-  font-weight: 600;
-  margin-bottom: 6px;
+.product_health_panel{
+    position:absolute;
+    right:12px;
+    bottom:60px;
+    background:#fff;
+    border-radius:10px;
+    min-width:220px;
+    padding:14px;
+    box-shadow:0 8px 24px rgba(0,0,0,.18);
+    opacity:0;
+    visibility:hidden;
+    transform:translateY(8px);
+    transition:.25s;
+    z-index:31;
 }
 
-.shophealth-check-row {
-  display: flex;
-  gap: 6px;
-  padding: 1px 0;
+.product_health_badge:hover + .product_health_panel{
+    opacity:1;
+    visibility:visible;
+    transform:none;
 }
 
-.check-pass {
-  color: #108043;
+.product_health_title{
+    font-weight:700;
+    margin-bottom:10px;
 }
 
-.check-fail {
-  color: #d82c0d;
+.shophealth-check-row{
+    display:flex;
+    gap:8px;
+    margin:6px 0;
 }
 
-.product_health_score {
-  margin-top: 6px;
-  font-weight: 600;
-  border-top: 1px solid #e1e3e5;
-  padding-top: 4px;
+.check-pass{
+    color:#2e7d32;
+}
+
+.check-fail{
+    color:#d32f2f;
 }

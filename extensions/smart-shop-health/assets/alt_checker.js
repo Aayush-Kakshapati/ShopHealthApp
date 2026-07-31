@@ -1,36 +1,31 @@
 (function () {
   function highlightMissingAlt() {
-    var productImages = document.querySelectorAll(
-      '.product img, [data-product-media] img, .product__media img'
-    );
+    document
+      .querySelectorAll(
+        ".product img,[data-product-media] img,.product__media img",
+      )
+      .forEach(function (img) {
+        if (img.dataset.shophealthAltDone) return;
 
-    productImages.forEach(function (img) {
-      var alt = img.getAttribute('alt');
-      if (!alt || alt.trim() === '') {
-        wrapWithWarning(img);
-      }
-    });
+        img.dataset.shophealthAltDone = true;
+
+        var alt = img.getAttribute("alt");
+
+        if (alt && alt.trim() !== "") return;
+
+        var container = img.closest(".product__media") || img.parentElement;
+
+        container.style.position = "relative";
+
+        var badge = document.createElement("div");
+
+        badge.className = "shophealth-alt-badge";
+        badge.textContent = "⚠ Missing Alt Text";
+        container.appendChild(badge);
+      });
   }
 
-  function wrapWithWarning(img) {
-    if (img.dataset.shophealthFlagged) return;
-    img.dataset.shophealthFlagged = 'true';
-
-    var wrapper = document.createElement('div');
-    wrapper.className = 'shophealth-alt-wrapper';
-
-    var badge = document.createElement('div');
-    badge.className = 'shophealth-alt-badge';
-    badge.textContent = '⚠ Missing Alt Text';
-
-    img.parentNode.insertBefore(wrapper, img);
-    wrapper.appendChild(img);
-    wrapper.appendChild(badge);
-  }
-
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', highlightMissingAlt);
-  } else {
-    highlightMissingAlt();
-  }
+  if (document.readyState === "loading")
+    document.addEventListener("DOMContentLoaded", highlightMissingAlt);
+  else highlightMissingAlt();
 })();

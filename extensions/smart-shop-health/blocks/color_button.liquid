@@ -11,7 +11,7 @@
   {{ block.settings.color_btn }}
 </button>
 
-{{ 'c_btn.js' | asset_url | script_tag }}
+<script src="{{ 'c_btn.js' | asset_url }}" defer></script>
 
 {% schema %}
 {

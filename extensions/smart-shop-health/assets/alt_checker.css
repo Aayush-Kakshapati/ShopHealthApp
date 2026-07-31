@@ -1,17 +1,14 @@
-.shophealth-alt-wrapper {
-  position: relative;
-  display: inline-block;
-}
-
 .shophealth-alt-badge {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  background: #fd2803;
+  max-height: 32px !important;
+  max-width: 108px !important;
+  top: 12px;
+  left: 12px;
+  background: #e53935;
   color: #fff;
+  padding: 6px 10px;
+  border-radius: 6px;
   font-size: 12px;
   font-weight: 600;
-  padding: 4px 8px;
-  border-radius: 4px;
   pointer-events: none;
 }

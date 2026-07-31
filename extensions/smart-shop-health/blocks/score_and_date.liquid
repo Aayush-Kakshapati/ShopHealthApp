@@ -1,17 +1,17 @@
 <div id="scoreDateTracker">
-    <div class="scoreDateBox">
-        <div id="health_score"></div>
-        <div id="last_scanned"></div>
-    </div>
+  <div class="scoreDateBox">
+    <div id="health_score"></div>
+    <div id="last_scanned"></div>
+  </div>
 </div>
 
 {{ 's_d.css' | asset_url | stylesheet_tag }}
-{{ 's_d.js' | asset_url | script_tag }}
+<script src="{{ 's_d.js' | asset_url }}" defer></script>
 
 {% schema %}
 {
-    "name": "Score and Date Tracker",
-    "target" : "body",
-    "settings": []
+  "name": "Score and Date Tracker",
+  "target": "body",
+  "settings": []
 }
 {% endschema %}
