@@ -1,9 +1,11 @@
+{{ 'product_health.css' | asset_url | stylesheet_tag }}
+
+<script src="{{ 'product_health.js' | asset_url }}" defer></script>
+
 {% if product %}
-<script>
-  window.shopHealthProductId = "gid://shopify/Product/{{ product.id }}";
-</script>
-  {{ 'product_health.css' | asset_url | stylesheet_tag }}
-  <script src="{{ 'product_health.js' | asset_url}}" defer></script>
+  <script>
+    window.shopHealthProductId = 'gid://shopify/Product/{{ product.id }}';
+  </script>
 {% endif %}
 
 {% schema %}

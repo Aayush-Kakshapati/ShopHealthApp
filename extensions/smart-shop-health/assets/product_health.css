@@ -1,20 +1,20 @@
-media-gallery{
+.product-media-container{
     position:relative;
 }
 
 .product_health_badge{
     position:absolute;
-    min-height: 40px !important;
-    min-width: 120px !important;
+    min-height: 4% !important;
+    min-width: 10% !important;
     right:12px !important;
     bottom:12px !important;
     background:#2e7d32;
     color:#fff;
-    padding:8px 14px;
+    padding:4px 8px;
     border-radius:30px;
     font-weight:600;
     cursor:pointer;
-    z-index:30;
+    z-index: 10;
 }
 
 .product_health_panel{
@@ -23,14 +23,14 @@ media-gallery{
     bottom:60px;
     background:#fff;
     border-radius:10px;
-    min-width:220px;
+    min-width:180px;
     padding:14px;
     box-shadow:0 8px 24px rgba(0,0,0,.18);
     opacity:0;
     visibility:hidden;
     transform:translateY(8px);
     transition:.25s;
-    z-index:31;
+    z-index: 10;
 }
 
 .product_health_badge:hover + .product_health_panel{
@@ -46,8 +46,7 @@ media-gallery{
 
 .shophealth-check-row{
     display:flex;
-    gap:8px;
-    margin:6px 0;
+    gap:4px;
 }
 
 .check-pass{

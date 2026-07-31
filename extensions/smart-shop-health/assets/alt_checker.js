@@ -13,7 +13,7 @@
 
         if (alt && alt.trim() !== "") return;
 
-        var container = img.closest(".product__media") || img.parentElement;
+        var container = img.closest(".product-media-container") || img.parentElement;
 
         container.style.position = "relative";
 

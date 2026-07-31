@@ -1,25 +1,84 @@
 (function () {
-  var productId = window.shopHealthProductId;
-  if (!productId) return;
+  var mainProductId = window.shopHealthProductId;
+  var requestedPairs = new Set();
 
-  function findMainProductImage() {
-    return document.querySelector(
+  function getProductIdFromCard(card) {
+    var idElement = card.querySelector(
+      "[id*='CardLink--'], [id*='StandardCardNoMediaLink--']",
+    );
+
+    if (!idElement) return null;
+    var match = idElement.id.match(/(\d+)$/);
+
+    if (!match) return null;
+    return "gid://shopify/Product/" + match[1];
+  }
+
+  function findProductItems() {
+    var products = [];
+    var mainImages = document.querySelectorAll(
       ".product img, [data-product-media] img, .product__media img",
     );
+
+    mainImages.forEach(function (img) {
+      if (mainProductId) {
+        products.push({
+          img: img,
+          productId: mainProductId,
+        });
+      }
+    });
+
+    var cards = document.querySelectorAll(".card-wrapper");
+
+    cards.forEach(function (card) {
+      var img = card.querySelector("img");
+      var productId = getProductIdFromCard(card);
+
+      if (img && productId) {
+        products.push({
+          img: img,
+          productId: productId,
+        });
+      }
+    });
+
+    return products;
+  }
+
+  function pairKey(img, productId) {
+    if (!img.dataset.shophealthKey) {
+      img.dataset.shophealthKey = Math.random().toString(36).slice(2);
+    }
+    return img.dataset.shophealthKey + "::" + productId;
   }
 
   function createOverlay(img, data) {
-    if (img.dataset.shophealthOverlayed) return;
-    img.dataset.shophealthOverlayed = "true";
+    var container =
+      img.closest(".product-media-container") ||
+      img.closest(".card__media") ||
+      img.parentElement;
 
-    var container = img.closest(".product-media-container") || img.parentElement;
-    if (!container) container = img.parentElement;
+    if (!container) return;
+
+    if (img.dataset.shophealthScore == data.score) {
+      return;
+    }
+
+    img.dataset.shophealthScore = data.score;
+
+    var oldBadge = container.querySelector(".product_health_badge");
+    var oldPanel = container.querySelector(".product_health_panel");
+
+    if (oldBadge) oldBadge.remove();
+    if (oldPanel) oldPanel.remove();
 
     container.style.position = "relative";
 
     var badge = document.createElement("div");
     badge.className = "product_health_badge";
-    badge.textContent = "Health: " + `${data.score} `;
+    badge.textContent = "Health: " + data.score;
+
     var panel = document.createElement("div");
     panel.className = "product_health_panel";
 
@@ -33,9 +92,11 @@
             "'>" +
             "<span>" +
             (check.passed ? "✓" : "✗") +
-            "</span><span>" +
+            "</span>" +
+            "<span>" +
             check.label +
-            "</span></div>"
+            "</span>" +
+            "</div>"
           );
         })
         .join("");
@@ -44,21 +105,53 @@
     container.appendChild(panel);
   }
 
-  function init() {
-    var img = findMainProductImage();
-    if (!img) return;
-
-    fetch("/apps/shophealth/health?productId=" + encodeURIComponent(productId))
-      .then(function (r) {
-        return r.json();
+  function fetchAndRenderHealth(product) {
+    fetch(
+      "/apps/shophealth/health?productId=" +
+        encodeURIComponent(product.productId),
+    )
+      .then(function (req) {
+        if (!req.ok) throw new Error("Request failed: " + req.status);
+        return req.json();
       })
       .then(function (data) {
         if (data.score == null) return;
-        createOverlay(img, data);
+        createOverlay(product.img, data);
+      })
+      .catch(function (err) {
+        console.error("Product health overlay error:", err);
       });
   }
 
-  if (document.readyState === "loading")
-    document.addEventListener("DOMContentLoaded", init);
-  else init();
+  function init() {
+    var products = findProductItems();
+
+    products.forEach(function (product) {
+      var key = pairKey(product.img, product.productId);
+      if (requestedPairs.has(key)) return;
+      requestedPairs.add(key);
+
+      fetchAndRenderHealth(product);
+    });
+  }
+
+  function observeForChanges() {
+    var debounceTimer;
+    var observer = new MutationObserver(function () {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(init, 150);
+    });
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  function start() {
+    init();
+    observeForChanges();
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", start);
+  } else {
+    start();
+  }
 })();
