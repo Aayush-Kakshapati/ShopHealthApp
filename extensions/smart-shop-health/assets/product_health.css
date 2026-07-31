@@ -1,58 +1,62 @@
-.product-media-container{
-    position:relative;
+.product-media-container {
+    position: relative;
 }
 
-.product_health_badge{
-    position:absolute;
+.product_health_badge {
+    position: absolute;
     min-height: 4% !important;
     min-width: 10% !important;
-    right:12px !important;
-    bottom:12px !important;
-    background:#2e7d32;
-    color:#fff;
-    padding:4px 8px;
-    border-radius:30px;
-    font-weight:600;
-    cursor:pointer;
+    right: 12px !important;
+    bottom: 12px !important;
+    background: #2e7d32;
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 30px;
+    font-weight: 600;
+    cursor: pointer;
+    z-index: 10;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.product_health_panel {
+    position: absolute;
+    right: 12px;
+    bottom: 60px;
+    background: #fff;
+    border-radius: 10px;
+    min-width: 180px;
+    padding: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .18);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(8px);
+    transition: .25s;
     z-index: 10;
 }
 
-.product_health_panel{
-    position:absolute;
-    right:12px;
-    bottom:60px;
-    background:#fff;
-    border-radius:10px;
-    min-width:180px;
-    padding:14px;
-    box-shadow:0 8px 24px rgba(0,0,0,.18);
-    opacity:0;
-    visibility:hidden;
-    transform:translateY(8px);
-    transition:.25s;
-    z-index: 10;
+.product_health_badge:hover+.product_health_panel {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
 }
 
-.product_health_badge:hover + .product_health_panel{
-    opacity:1;
-    visibility:visible;
-    transform:none;
+.product_health_title {
+    font-weight: 700;
+    margin-bottom: 10px;
 }
 
-.product_health_title{
-    font-weight:700;
-    margin-bottom:10px;
+.shophealth-check-row {
+    display: flex;
+    gap: 4px;
 }
 
-.shophealth-check-row{
-    display:flex;
-    gap:4px;
+.check-pass {
+    color: #2e7d32;
 }
 
-.check-pass{
-    color:#2e7d32;
-}
-
-.check-fail{
-    color:#d32f2f;
+.check-fail {
+    color: #d32f2f;
 }

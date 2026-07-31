@@ -56,7 +56,7 @@
   function createOverlay(img, data) {
     var container =
       img.closest(".product-media-container") ||
-      img.closest(".card--media") ||
+      img.closest(".card__inner") ||
       img.parentElement;
 
     if (!container) return;
@@ -77,7 +77,8 @@
 
     var badge = document.createElement("div");
     badge.className = "product_health_badge";
-    badge.textContent = "Health: " + data.score;
+
+    badge.textContent = data ? data.score : "loading...";
 
     var panel = document.createElement("div");
     panel.className = "product_health_panel";

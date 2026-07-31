@@ -2,35 +2,97 @@
   fetch("/apps/shophealth/score")
     .then(function (res) {
       if (!res.ok) {
-        throw new Error("Request Failed" + res.status);
+        throw new Error("Request Failed " + res.status);
       }
-      return res.json()
+      return res.json();
     })
     .then(function (data) {
-      var scoreVal = document.getElementById("health_score");
-      var lastScanVal = document.getElementById("last_scanned");
+      var healthTracker = document.getElementById("healthTracker");
 
-      if (data == null) {
-        scoreVal.textContent = "No Scan Has Been Performed";
-        lastScanVal.textContent = "";
+      if (!healthTracker) return;
+
+      if (!data) {
+        healthTracker.innerHTML = `
+          <div class="scoreDateBox">
+            No Scan
+          </div>
+        `;
         return;
       }
 
-      scoreVal.textContent = "Store Health: " + data.score;
-      if (data.lastScanDate) {
-        var d = new Date(data.lastScanDate);
-        lastScanVal.textContent =
-          "Last scan: " +
-          d.toLocaleDateString(undefined, {
+      var scanDate = data.lastScanDate
+        ? new Date(data.lastScanDate).toLocaleDateString(undefined, {
             month: "short",
             day: "numeric",
             year: "numeric",
+          })
+        : "No Date";
+
+      healthTracker.innerHTML = `
+        <div class="scoreDateBox">
+          Store Health ${data.score}
+        </div>
+      `;
+
+      healthTracker.addEventListener("click", function () {
+        openModal(data);
+      });
+
+      function openModal(data) {
+        var existingModal = document.querySelector(".issue_display_modal");
+
+        if (existingModal) {
+          existingModal.remove();
+        }
+
+        var modalContainer = document.createElement("div");
+        modalContainer.className = "issue_display_modal";
+
+        modalContainer.innerHTML = `
+          <div class="issue_modal_box">
+            <h3>Store Health Details</h3>
+
+            <p>
+              Health Score:
+              ${data.score}
+            </p>
+
+            <p>
+              Last Scan:
+              ${scanDate}
+            </p>
+
+            ${
+              data.issues
+                ? `
+                  <h4>Issues</h4>
+                  <ul>
+                    ${data.issues
+                      .map(function (issue) {
+                        return `<li>${issue}</li>`;
+                      })
+                      .join("")}
+                  </ul>
+                `
+                : "<p>No issues found</p>"
+            }
+
+            <button class="close_modal">
+              Close
+            </button>
+          </div>
+        `;
+
+        document.body.appendChild(modalContainer);
+
+        modalContainer
+          .querySelector(".close_modal")
+          .addEventListener("click", function () {
+            modalContainer.remove();
           });
       }
     })
     .catch(function (err) {
-      document.getElementById("health_score").textContent = 'Unable to load score';
-        console.error('ShopHealth widget error:', err);
-      });
-  })();
-
+      console.error("ShopHealth widget error:", err);
+    });
+})();
