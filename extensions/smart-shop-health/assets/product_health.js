@@ -4,7 +4,7 @@
 
   function getProductIdFromCard(card) {
     var idElement = card.querySelector(
-      "[id*='CardLink--'], [id*='StandardCardNoMediaLink--']",
+      "[id*='CardLink--'], [id*='StandardCardNoMediaLink--'], [id*='CardLink-template--'], [id*='StandardCardNoMediaLink-template--']",
     );
 
     if (!idElement) return null;
@@ -56,7 +56,7 @@
   function createOverlay(img, data) {
     var container =
       img.closest(".product-media-container") ||
-      img.closest(".card__media") ||
+      img.closest(".card--media") ||
       img.parentElement;
 
     if (!container) return;
