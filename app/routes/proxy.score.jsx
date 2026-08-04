@@ -13,7 +13,7 @@ export async function loader({ request }) {
   });
 
   if (!store) {
-    return Response.json({ score: null, lastScanDate: null });
+    return Response.json({ score: null, lastScanDate: null, issues: [] });
   }
 
   const latestScan = await prisma.scan.findFirst({
@@ -22,10 +22,17 @@ export async function loader({ request }) {
       finishedAt: { not: null },
     },
     orderBy: { finishedAt: "desc" },
+    include: {
+      issues: {
+        where: { status: "Open" },
+        orderBy: { severity: "asc" },
+      },
+    },
   });
 
   return Response.json({
     score: latestScan?.score ?? null,
     lastScanDate: latestScan?.finishedAt ?? null,
+    issues: latestScan?.issues ?? [],
   });
 }
